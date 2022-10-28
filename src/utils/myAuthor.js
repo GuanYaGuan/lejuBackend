@@ -1,5 +1,5 @@
-const LEJU_ADMIN_TOKEN = 'leju_admin'
-const LEJU_ADMIN_USERINFO = 'leju_admin'
+const LEJU_ADMIN_TOKEN = 'leju_admin-token'
+const LEJU_ADMIN_USERINFO = 'leju_admin-userinfo'
 // 保存 token
 export function setToken(token) {
   window.localStorage.setItem(LEJU_ADMIN_TOKEN, token)

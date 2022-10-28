@@ -1,26 +1,21 @@
 <template>
-  <div class="content" />
+  <div class="dashboard-container">账号管理</div>
 </template>
 
 <script>
 export default {
-
   data() {
-    return {
-
-    }
+    return {}
   },
 
-  mounted() {
+  mounted() {},
 
-  },
-
-  methods: {
-
-  }
+  methods: {}
 }
 </script>
 
 <style lang="scss" scoped>
-
+.dashboard-container {
+  margin: 30px;
+}
 </style>

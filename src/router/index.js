@@ -86,7 +86,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/goods/list',
     name: '商品管理',
-    meta: { title: '商品管理', icon: 'dashboard' },
+    meta: { title: '商品管理', icon: 'dianpu' },
     children: [
       {
         path: 'list',
