@@ -207,7 +207,9 @@ export default {
       this.getArticleListInit()
     },
     // 点击 编辑
-    edit() {},
+    edit() {
+      // 弹出 编辑页面
+    },
     // 点击 删除
     del() {}
   }
