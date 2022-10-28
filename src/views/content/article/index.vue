@@ -9,7 +9,12 @@
         <el-row :gutter="20">
           <el-col :span="6">
             <el-form-item label="作者">
-              <el-input v-model="searchForm.title" placeholder="作者" />
+              <el-input
+                v-model="searchForm.title"
+                clearable
+                placeholder="作者"
+                @clear="initData"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="6">
@@ -18,6 +23,7 @@
                 v-model="searchForm.author"
                 placeholder="标题"
                 clearable
+                @clear="initData"
               />
             </el-form-item>
           </el-col>
@@ -28,6 +34,7 @@
                 placeholder="编辑类型"
                 clearable
                 style="width: 100%"
+                @clear="initData"
               >
                 <el-option label="富文本" :value="0" />
                 <el-option label="Markdown" :value="1" />
@@ -58,7 +65,13 @@
       </div>
       <!-- 带边框的表格 -->
       <el-table stripe :data="articleList" border style="width: 100%">
-        <el-table-column type="index" width="50" align="center" label="序号" fixed />
+        <el-table-column
+          type="index"
+          width="50"
+          align="center"
+          label="序号"
+          fixed
+        />
         <el-table-column
           align="center"
           prop="title"
@@ -110,24 +123,28 @@
               v-if="scope.row.editorType == 0"
               size="small"
               type="primary"
+              plain
             >富文本</el-button>
             <el-button
               v-if="scope.row.editorType == 1"
               size="small"
-              type="primary"
+              type="success"
+              plain
             >Markdown</el-button>
           </template>
         </el-table-column>
         <el-table-column align="center" fixed="right" label="操作" width="150">
           <template slot-scope="scope">
             <el-button
-              type="primary"
-              size="mini"
+              type="text"
+              size="small"
+              icon="el-icon-view"
               @click="edit(scope.row)"
             >编辑</el-button>
             <el-button
-              type="danger"
-              size="mini"
+              type="text"
+              size="small"
+              style="color: #f00; margin-left: 20px"
               @click="del(scope.row)"
             >删除</el-button>
           </template>
@@ -166,10 +183,22 @@ export default {
   },
 
   methods: {
+    // 在点击由 clearable 属性生成的清空按钮时触发
+    initData() {
+      this.page.currentPage = 1
+      this.getArticleListInit()
+    },
     // 重置表单
-    reset() {},
+    reset() {
+      // 表单数据赋值为 空对象
+      this.searchForm = {}
+    },
     // 搜索
-    search() {},
+    search() {
+      // console.log(this.searchForm)
+      this.page.currentPage = 1
+      this.getArticleListInit()
+    },
     // 获取文章列表
     getArticleListInit() {
       var form = {}
