@@ -61,7 +61,7 @@
     <!-- 新增及内容展示 -->
     <el-card class="card" shadow="never">
       <div slot="header" class="clearfix">
-        <el-button type="primary" size="mini">新增</el-button>
+        <el-button type="primary" size="mini" @click="addArticle">新增</el-button>
       </div>
       <!-- 带边框的表格 -->
       <el-table stripe :data="articleList" border style="width: 100%">
@@ -166,8 +166,12 @@
 </template>
 
 <script>
-import { getArticleList as getArticleListApi } from '@/api/content/article/index'
+import {
+  getArticleList as getArticleListApi,
+  delArticle as delArticleApi
+} from '@/api/content/article/index'
 import mix from '@/mixins/index'
+import { Message } from 'element-ui'
 export default {
   mixins: [mix],
   data() {
@@ -236,11 +240,30 @@ export default {
       this.getArticleListInit()
     },
     // 点击 编辑
-    edit() {
+    edit(val) {
       // 弹出 编辑页面
     },
     // 点击 删除
-    del() {}
+    del(val) {
+      console.log(val)
+      delArticleApi(val.id).then((res) => {
+        // console.log(res)
+        if (res.success) {
+          Message({
+            message: '删除成功',
+            type: 'success',
+            duration: 5 * 1000
+          })
+          this.page.currentPage = 1
+          this.getArticleListInit()
+        }
+      })
+    },
+    // 点击 新增 按钮
+    addArticle() {
+      // 跳转至 新增页面
+      this.$router.push('/content/detail')
+    }
   }
 }
 </script>
