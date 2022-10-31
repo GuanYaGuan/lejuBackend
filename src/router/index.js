@@ -186,10 +186,11 @@ export const constantRoutes = [
         meta: { title: '文章列表', icon: 'el-icon-document' }
       },
       {
-        path: 'detail',
+        path: 'article/detail',
         name: 'Detail',
         hidden: true,
-        component: () => import('@/views/content/article/detail/index')
+        component: () => import('@/views/content/article/detail/index'),
+        meta: { title: '详情列表', icon: 'el-icon-document', activeMenu: '/content/article' }
       },
       {
         path: 'material',

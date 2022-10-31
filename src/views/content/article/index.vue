@@ -168,7 +168,8 @@
 <script>
 import {
   getArticleList as getArticleListApi,
-  delArticle as delArticleApi
+  delArticle as delArticleApi,
+  changeShow as changeShowApi
 } from '@/api/content/article/index'
 import mix from '@/mixins/index'
 import { Message } from 'element-ui'
@@ -219,7 +220,7 @@ export default {
           // console.log(res)
           if (res.success) {
             this.articleList = res.data.rows
-            // 声明多少条数据
+            // 声总数居条数
             this.page.total = res.data.total
           } else {
             this.$message.error('请求失败')
@@ -262,7 +263,22 @@ export default {
     // 点击 新增 按钮
     addArticle() {
       // 跳转至 新增页面
-      this.$router.push('/content/detail')
+      this.$router.push('/content/article/detail')
+    },
+    // 点击 文章显示按钮
+    showChange(val) {
+      changeShowApi({
+        isShow: val.isShow,
+        id: val.id
+      })
+        .then(res => {
+          console.log(res)
+          if (res.success) {
+            Message.success('文章状态修改成功')
+          } else {
+            Message.error(res.message)
+          }
+        })
     }
   }
 }
