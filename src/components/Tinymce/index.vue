@@ -1,8 +1,16 @@
 <template>
-  <div :class="{fullscreen:fullscreen}" class="tinymce-container" :style="{width:containerWidth}">
+  <div
+    :class="{ fullscreen: fullscreen }"
+    class="tinymce-container"
+    :style="{ width: containerWidth }"
+  >
     <textarea :id="tinymceId" class="tinymce-textarea" />
     <div class="editor-custom-btn-container">
-      <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK" />
+
+      <el-button class="btn" type="primary" size="mini" icon="el-icon-upload">上传图片
+        <input class="ipt-file" type="file" @change="fileChange($event)">
+      </el-button>
+      <!-- <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK" /> -->
     </div>
   </div>
 </template>
@@ -12,25 +20,32 @@
  * docs:
  * https://panjiachen.github.io/vue-element-admin-site/feature/component/rich-editor.html#tinymce
  */
-import editorImage from './components/EditorImage'
+// import editorImage from './components/EditorImage'
 import plugins from './plugins'
 import toolbar from './toolbar'
 import load from './dynamicLoadScript'
 // why use this cdn, detail see https://github.com/PanJiaChen/tinymce-all-in-one
 
-const tinymceCDN = 'https://cdn.jsdelivr.net/npm/tinymce-all-in-one@4.9.3/tinymce.min.js'
+const tinymceCDN =
+  'https://cdn.jsdelivr.net/npm/tinymce-all-in-one@4.9.3/tinymce.min.js'
 
 // const tinymceCDN = 'https://cdn.staticfile.org/tinymce/4.9.3/tinymce.min.js'
-// import axios from 'axios'
-import upload from '@/api/upload'
+import axios from 'axios'
+// import upload from '@/api/upload'
+import { getToken } from '@/utils/myAuthor'
+import { Message } from 'element-ui'
 export default {
   name: 'Tinymce',
-  components: { editorImage },
+  // components: { editorImage },
   props: {
     id: {
       type: String,
       default: function() {
-        return 'vue-tinymce-' + +new Date() + ((Math.random() * 1000).toFixed(0) + '')
+        return (
+          'vue-tinymce-' +
+          +new Date() +
+          ((Math.random() * 1000).toFixed(0) + '')
+        )
       }
     },
     value: {
@@ -66,17 +81,18 @@ export default {
       tinymceId: this.id,
       fullscreen: false,
       languageTypeList: {
-        'en': 'en',
-        'zh': 'zh_CN',
-        'es': 'es_MX',
-        'ja': 'ja'
+        en: 'en',
+        zh: 'zh_CN',
+        es: 'es_MX',
+        ja: 'ja'
       }
     }
   },
   computed: {
     containerWidth() {
       const width = this.width
-      if (/^[\d]+(\.[\d]+)?$/.test(width)) { // matches `100`, `'100'`
+      if (/^[\d]+(\.[\d]+)?$/.test(width)) {
+        // matches `100`, `'100'`
         return `${width}px`
       }
       return width
@@ -86,7 +102,8 @@ export default {
     value(val) {
       if (!this.hasChange && this.hasInit) {
         this.$nextTick(() =>
-          window.tinymce.get(this.tinymceId).setContent(val || ''))
+          window.tinymce.get(this.tinymceId).setContent(val || '')
+        )
       }
     }
   },
@@ -114,7 +131,6 @@ export default {
         }
         this.initTinymce()
       })
-      this.initTinymce()
     },
     initTinymce() {
       const _this = this
@@ -140,7 +156,7 @@ export default {
         default_link_target: '_blank',
         link_title: false,
         nonbreaking_force_tab: true, // inserting nonbreaking space &nbsp; need Nonbreaking Space Plugin
-        init_instance_callback: editor => {
+        init_instance_callback: (editor) => {
           if (_this.value) {
             editor.setContent(_this.value)
           }
@@ -176,23 +192,31 @@ export default {
           // tinymce api文档查阅可知   直接获取blob原始数据
           var blob = blobInfo.blob()
           // 获取token
+
           // 原生上传
           var fd = new FormData()
           fd.append('file', blob)
           // 添加token
+          var token = getToken()
           // 上传到 通用上传接口   oss里 添加token
-          upload.uploadApi(fd)
-          // axios.post(_this.uploadUrl, fd, { headers })
-            .then(res => {
-              const resData = res
+          // upload.uploadApi(fd)
+          axios
+            .post('/lejuAdmin/material/uploadFileOss', fd, {
+              headers: { token: token }
+            })
+            .then((res) => {
+              const resData = res.data
               if (resData.success) {
-                // 固定写法  为了符合 tinymce的 上传成功回调显示
+                // 回调
                 success(resData.data.fileUrl)
-                // 这里用于实现  把上传后的 url 直接以img形式拼接到 富文本内容中的光标处
-                // window.tinymce.get(_this.tinymceId).insertContent(`<img src="${resData.ossUrl}" >`)
+                // 拼接image 标签
+                window.tinymce
+                  .get(_this.tinymceId)
+                  .insertContent(`<img src="${resData.ossUrl}" >`)
               }
               progress(100)
-            }).catch(err => {
+            })
+            .catch((err) => {
               console.log(err)
               progress(100)
             })
@@ -224,23 +248,50 @@ export default {
     getContent() {
       return window.tinymce.get(this.tinymceId).getContent()
     },
-    // 外部傳入圖片
-    imageSuccessCBK(url) {
+    // // 外部傳入圖片
+    fileChange(e) {
+      // console.log(e.target.files)
+      var files = e.target.files
+      var fileimage = files[0]
+      var formData = new FormData()
+      formData.append('file', fileimage)
+      var token = getToken()
+      axios
+        .post('/lejuAdmin/material/uploadFileOss', formData, {
+          headers: { token: token }
+        })
+        .then((res) => {
+          const resData = res.data
+          if (resData.success) {
+            // 回调
+            // success(resData.data.fileUrl)
+            this.imageSuccessCBK(resData.data.fileUrl)
+            // 拼接image 标签
+            window.tinymce
+              .get(this.tinymceId)
+              .insertContent(`<img src="${resData.ossUrl}" >`)
+          } else {
+            Message.error(resData.data.message)
+          }
+        })
+    },
+    imageSuccessCBK(imgUrl) {
       // const _this = this
       // arr.forEach(v => {
-      window.tinymce.get(this.tinymceId).insertContent(`<img class="wscnph" src="${url}" >`)
+      // window.tinymce.get(this.tinymceId).insertContent(`<img class="wscnph" src="${url}" >`)
       // })
+      window.tinymce.get(this.tinymceId).insertContent(`<img class="wscnph" src="${imgUrl}" >`)
     }
   }
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .tinymce-container {
   position: relative;
   line-height: normal;
 }
-.tinymce-container>>>.mce-fullscreen {
+.tinymce-container >>> .mce-fullscreen {
   z-index: 10000;
 }
 .tinymce-textarea {
@@ -259,5 +310,17 @@ export default {
 }
 .editor-upload-btn {
   display: inline-block;
+}
+.btn{
+  position: relative;
+  .ipt-file{
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
 }
 </style>

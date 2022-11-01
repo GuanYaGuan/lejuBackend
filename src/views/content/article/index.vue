@@ -243,10 +243,16 @@ export default {
     // 点击 编辑
     edit(val) {
       // 弹出 编辑页面
+      this.$router.push({
+        path: '/content/article/editDetail',
+        query: {
+          id: val.id
+        }
+      })
     },
     // 点击 删除
     del(val) {
-      console.log(val)
+      // console.log(val)
       delArticleApi(val.id).then((res) => {
         // console.log(res)
         if (res.success) {
@@ -263,7 +269,7 @@ export default {
     // 点击 新增 按钮
     addArticle() {
       // 跳转至 新增页面
-      this.$router.push('/content/article/detail')
+      this.$router.push('/content/article/addDetail')
     },
     // 点击 文章显示按钮
     showChange(val) {

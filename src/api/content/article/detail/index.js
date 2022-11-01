@@ -23,4 +23,14 @@ export function updateArticle(data) {
     data
   })
 }
+/**
+ * 查阅文章明细
+ * @param {*} id 参数id
+ * @returns
+ */
+export function productArticle(id) {
+  return request({
+    url: `/lejuAdmin/productArticle/productArticle/${id}`
+  })
+}
 

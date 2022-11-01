@@ -186,11 +186,18 @@ export const constantRoutes = [
         meta: { title: '文章列表', icon: 'el-icon-document' }
       },
       {
-        path: 'article/detail',
-        name: 'Detail',
+        path: 'article/addDetail',
+        name: 'addDetail',
         hidden: true,
         component: () => import('@/views/content/article/detail/index'),
-        meta: { title: '详情列表', icon: 'el-icon-document', activeMenu: '/content/article' }
+        meta: { title: '新增文章', icon: 'el-icon-document', activeMenu: '/content/article' }
+      },
+      {
+        path: 'article/editDetail',
+        name: 'editDetail',
+        hidden: true,
+        component: () => import('@/views/content/article/detail/index'),
+        meta: { title: '编辑文章', icon: 'el-icon-document', activeMenu: '/content/article' }
       },
       {
         path: 'material',
