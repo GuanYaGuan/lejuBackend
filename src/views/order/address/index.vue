@@ -2,25 +2,16 @@
   <div class="content">
     <el-card shadow="never">
       <div slot="header" class="clearfix">
-        <el-button
-          type="primary"
-          size="small"
-          @click="dialogVisible = true"
-        >新增</el-button>
+        <el-button type="primary" size="small" @click="add">新增</el-button>
       </div>
       <!-- 对话框 -->
-      <el-dialog
-        title="地址详情"
-        :visible.sync="dialogVisible"
-        width="50%"
-        :before-close="handleClose"
-      >
-        <el-form ref="form" :model="form" label-width="100px">
+      <el-dialog title="地址详情" :visible.sync="dialogVisible" width="50%">
+        <el-form ref="form" :rules="rule" :model="form" label-width="100px">
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="发货地址">
+              <el-form-item label="发货地址" prop="addressName">
                 <el-input
-                  v-model="form.sendAddress"
+                  v-model="form.addressName"
                   clearable
                   placeholder="请输入发货地址"
                 />
@@ -28,13 +19,17 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="发货人姓名">
-                <el-input v-model="form.name" placeholder="请输入发货人姓名" />
+                <el-input
+                  v-model="form.name"
+                  clearable
+                  placeholder="请输入发货人姓名"
+                />
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="发货人手机号">
+              <el-form-item label="发货人手机号" prop="phone">
                 <el-input
                   v-model="form.phone"
                   clearable
@@ -44,7 +39,11 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="邮政编码">
-                <el-input v-model="form.number" placeholder="请输入邮政编码" />
+                <el-input
+                  v-model="form.postCode"
+                  clearable
+                  placeholder="请输入邮政编码"
+                />
               </el-form-item>
             </el-col>
           </el-row>
@@ -64,7 +63,8 @@
             <el-col :span="12">
               <el-form-item label="详细地址">
                 <el-input
-                  v-model="form.addressDetail"
+                  v-model="form.detailAddress"
+                  clearable
                   placeholder="请输入详细地址"
                 />
               </el-form-item>
@@ -73,7 +73,16 @@
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="sureForm">确 定</el-button>
+          <el-button
+            v-if="isshow"
+            type="primary"
+            @click="sureForm"
+          >确 定</el-button>
+          <el-button
+            v-if="!isshow"
+            type="primary"
+            @click="uploadForm"
+          >更 新</el-button>
         </span>
       </el-dialog>
       <!-- 表格 -->
@@ -86,6 +95,7 @@
               v-model="scope.row.sendStatus"
               :active-value="1"
               :inactive-value="0"
+              @change="sendOne(scope.row.id)"
             />
           </template>
         </el-table-column>
@@ -98,6 +108,7 @@
               v-model="scope.row.receiveStatus"
               :active-value="1"
               :inactive-value="0"
+              @change="receive(scope.row.id)"
             />
           </template>
         </el-table-column>
@@ -108,13 +119,13 @@
               type="text"
               size="small"
               icon="el-icon-view"
-              @click="edit(scope.row)"
+              @click="edit(scope.row.id)"
             >编辑</el-button>
             <el-button
               type="text"
               size="small"
               style="color: #f00; margin-left: 20px"
-              @click="del(scope.row)"
+              @click="del(scope.row.id)"
             >删除</el-button>
           </template>
         </el-table-column>
@@ -124,44 +135,189 @@
 </template>
 
 <script>
-import { addressList } from '@/api/order/address/index'
-import { regionDataPlus } from 'element-china-area-data'
+import {
+  addressList,
+  saveAddress,
+  delAddress,
+  detailAddress,
+  uodateAddress,
+  setReceiveOne,
+  setSendOne
+} from '@/api/order/address/index'
+import {
+  regionDataPlus,
+  CodeToText,
+  TextToCode
+} from 'element-china-area-data'
+import { Message } from 'element-ui'
 export default {
   data() {
+    var validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入手机号码'))
+      } else {
+        var reg = /^[1][3,5,7,8][0-9]{9}$/
+        if (!reg.test(this.form.phone)) {
+          return callback(new Error('请输入正确的手机号码'))
+        }
+        callback()
+      }
+    }
     return {
+      isshow: true,
       tableData: [],
       dialogVisible: false,
-      form: {},
+      form: {
+        province: '',
+        city: '',
+        region: '',
+        receiveStatus: 0,
+        sendStatus: 0,
+        cityCode: ''
+      },
       options: regionDataPlus,
-      selectedOptions: []
+      selectedOptions: [],
+      rule: {
+        addressName: [
+          { required: true, message: '请输入发货地址', trigger: 'blur' },
+          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ],
+        phone: [{ validator: validatePass, trigger: 'blur' }]
+      }
     }
   },
   created() {
-    addressList().then((res) => {
-      // console.log(res.data.items)
-      const { data } = res
-      data.items.forEach((el) => {
-        el.address = el.province + el.city + el.detailAddress
-      })
-      this.tableData = data.items
-    })
+    this.initAddressList()
   },
   mounted() {},
 
   methods: {
-    // before-close  关闭之前触发
-    handleClose(done) {
-      this.$confirm('确认关闭？')
-        .then((_) => {
-          done()
+    // 点击 新增按钮
+    add() {
+      this.isshow = true
+      this.form = {}
+      this.selectedOptions = []
+      this.dialogVisible = true
+    },
+    // 初始数据
+    initAddressList() {
+      addressList().then((res) => {
+        // console.log(res.data.items)
+
+        const { data } = res
+        data.items.forEach((el) => {
+          el.address = el.province + el.city + el.detailAddress
         })
-        .catch((_) => {})
+        this.tableData = data.items
+      })
     },
     // 点击 确定 提交表单
-    sureForm() {},
+    sureForm() {
+      // console.log(this.form)
+      saveAddress(this.form).then((res) => {
+        const { success, message } = res
+        if (success) {
+          Message.success('新增成功')
+          this.dialogVisible = false
+          this.initAddressList()
+        } else {
+          Message.error(message)
+        }
+      })
+    },
     // 地址 选择 改变
     handleChange(value) {
-      console.log(value)
+      // console.log(value) // value 是个数组
+      this.form.cityCode = value[0] + value[1] + value[2]
+      this.form.province = CodeToText[value[0]]
+      this.form.city = CodeToText[value[1]]
+      this.form.region = CodeToText[value[2]]
+    },
+    // 点击 删除 按钮
+    del(id) {
+      delAddress(id).then((res) => {
+        const { success, message } = res
+        if (success) {
+          Message.success('删除成功')
+          this.initAddressList()
+        } else {
+          Message.error(message)
+        }
+      })
+    },
+    // 点击 编辑 按钮
+    edit(id) {
+      // console.log(id)
+      this.isshow = false
+      detailAddress(id).then((res) => {
+        // console.log(res)
+        const { data, success } = res
+        if (success) {
+          this.selectedOptions = []
+          this.form = data.address
+          // this.form.province = TextToCode[data.address.province].code
+          // console.log(TextToCode[data.address.province].code)
+          // console.log(TextToCode[data.address.province][data.address.city].code)
+          // console.log(TextToCode[data.address.province][data.address.city][data.address.region].code)
+          this.selectedOptions.push(TextToCode[data.address.province].code)
+          this.selectedOptions.push(
+            TextToCode[data.address.province][data.address.city].code
+          )
+          this.selectedOptions.push(
+            TextToCode[data.address.province][data.address.city][
+              data.address.region
+            ].code
+          )
+          this.dialogVisible = true
+        }
+      })
+    },
+    // 点击 更新 按钮
+    uploadForm() {
+      uodateAddress(this.form).then((res) => {
+        const { success, message } = res
+        if (success) {
+          Message.success('更新成功')
+          this.dialogVisible = false
+          this.initAddressList()
+        } else {
+          Message.error(message)
+        }
+      })
+    },
+    // 收货地址 开关 改变
+    receive(id) {
+      setReceiveOne({
+        id: id,
+        receiveStatus: 1
+      })
+        .then(res => {
+          const { success, message } = res
+          if (success) {
+            Message.success('状态更改成功')
+            this.dialogVisible = false
+            this.initAddressList()
+          } else {
+            Message.error(message)
+          }
+        })
+    },
+    // 发货地址 开关 发生改变
+    sendOne(id) {
+      setSendOne({
+        id: id,
+        sendStatus: 1
+      })
+        .then(res => {
+          const { success, message } = res
+          if (success) {
+            Message.success('状态更改成功')
+            this.dialogVisible = false
+            this.initAddressList()
+          } else {
+            Message.error(message)
+          }
+        })
     }
   }
 }
