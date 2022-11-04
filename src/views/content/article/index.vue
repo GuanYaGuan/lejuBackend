@@ -278,7 +278,7 @@ export default {
         id: val.id
       })
         .then(res => {
-          console.log(res)
+          // console.log(res)
           if (res.success) {
             Message.success('文章状态修改成功')
           } else {
