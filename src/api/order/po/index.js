@@ -13,3 +13,13 @@ export function findOrdersByPage(start, limit, data) {
     data
   })
 }
+/**
+ * 订单明细
+ * @param {*} orderId
+ * @returns
+ */
+export function orderDetail(orderId) {
+  return request({
+    url: `/lejuAdmin/order/orderDetail/${orderId}`
+  })
+}

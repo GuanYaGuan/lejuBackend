@@ -185,7 +185,7 @@
               type="primary"
               size="small"
               icon="el-icon-view"
-              @click="openDetail(scope.row)"
+              @click="openDetail(scope.row.id)"
             >查看订单</el-button>
           </template>
         </el-table-column>
@@ -259,7 +259,7 @@ export default {
             // 声总数居条数
             this.page.total = res.data.total
           } else {
-            this.$message.error('请求失败')
+            Message.error('请求失败')
           }
           this.listLoading = false
         }
@@ -277,8 +277,11 @@ export default {
       this.getArticleListInit()
     },
     // 点击 查看 订单
-    openDetail() {
-      this.$router.push('/order/orderDetail')
+    openDetail(id) {
+      this.$router.push({ path: '/order/orderDetail',
+        query: {
+          id
+        }})
     }
   }
 }
