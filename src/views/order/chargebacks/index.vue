@@ -137,7 +137,7 @@
               type="primary"
               size="small"
               icon="el-icon-view"
-              @click="openDetail(scope.row)"
+              @click="openDetail(scope.row.id)"
             >查看订单</el-button>
           </template>
         </el-table-column>
@@ -205,7 +205,7 @@ export default {
       this.listLoading = true
       findReturnApply(this.page.currentPage, this.page.size, form).then(
         (res) => {
-          console.log(res.data)
+          // console.log(res.data)
           if (res.success) {
             res.data.rows.forEach(el => {
               el.productAttr = JSON.parse(el.productAttr)
@@ -232,8 +232,13 @@ export default {
       this.getArticleListInit()
     },
     // 点击 查看 订单
-    openDetail() {
-      this.$router.push('/order/orderReturnDetail')
+    openDetail(id) {
+      this.$router.push({
+        path: '/order/orderReturnDetail',
+        query: {
+          id
+        }
+      })
     }
   }
 }

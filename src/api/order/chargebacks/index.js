@@ -9,6 +9,17 @@ import request from '@/api/request'
 export function findReturnApply(start, limit, data) {
   return request({
     url: `/lejuAdmin/orderReturn/findReturnApply/${start}/${limit}`,
-    method: 'post', data
+    method: 'post',
+    data
+  })
+}
+/**
+ * 退单详情 数据
+ * @param {*} id
+ * @returns
+ */
+export function orderReturn(id) {
+  return request({
+    url: `/lejuAdmin/orderReturn/${id}`
   })
 }

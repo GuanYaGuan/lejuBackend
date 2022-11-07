@@ -13,7 +13,6 @@
         <goods :form-data="formData" :brand-data="brandData" :list="list" :total="total" :start="start" :limit="limit" @initData="initClear" @searchData="search" @uptLimit="parLimit" @uptStart="parStart" />
         <span slot="footer">
           <el-button @click="dialogVisible=false">取消</el-button>
-          <el-button type="primary">确定</el-button>
         </span>
       </el-dialog>
       <!-- 表格 -->
