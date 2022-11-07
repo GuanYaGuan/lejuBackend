@@ -2,33 +2,35 @@
   <div class="content">
     <el-card shadow="never">
       <div slot="header" class="clearfix">
-        <el-button type="primary" size="small" @click="openDetail">热销详情</el-button>
+        <el-button
+          type="primary"
+          size="small"
+          @click="openDetail"
+        >热销详情</el-button>
       </div>
       <!-- 对话框 -->
       <el-dialog title="热销详情" :visible.sync="dialogVisible" width="70%">
-        <el-table border sreipe style="width: 100%">
-          <el-table-column label="条件查询" />
-          <el-table-column>
-            <el-form :model="formData">
-              <el-form-item>
-                <el-input v-model="formData.brandName" placeholder="商品名称/模糊查询" />
-              </el-form-item>
-              <el-form-item>
-                <el-input v-model="formData.number" placeholder="商品货号/模糊查询" />
-              </el-form-item>
-              <!-- <el-form-item>
-                <el-select placeholder="">
-                  <el-option :value="品牌" />
-                </el-select>
-              </el-form-item> -->
-            </el-form>
-          </el-table-column>
-        </el-table>
+        <goods :form-data="formData" :brand-data="brandData" :list="list" :total="total" :start="start" :limit="limit" @initData="initClear" @searchData="search" @uptLimit="parLimit" @uptStart="parStart" />
+        <span slot="footer">
+          <el-button @click="dialogVisible=false">取消</el-button>
+          <el-button type="primary">确定</el-button>
+        </span>
       </el-dialog>
       <!-- 表格 -->
       <el-table :data="tableData" border stripe style="width: 100%">
-        <el-table-column fixed align="center" type="index" width="50" label="序号" />
-        <el-table-column prop="addressName" label="商品图片" align="center" width="120">
+        <el-table-column
+          fixed
+          align="center"
+          type="index"
+          width="50"
+          label="序号"
+        />
+        <el-table-column
+          prop="addressName"
+          label="商品图片"
+          align="center"
+          width="120"
+        >
           <template slot-scope="scope">
             <img :src="scope.row.pic" alt="" width="100" height="100">
           </template>
@@ -40,11 +42,36 @@
           </template>
         </el-table-column>
         <el-table-column prop="" label="是否过期" align="center" width="120" />
-        <el-table-column prop="name" label="商品名称" align="center" width="220" />
-        <el-table-column prop="brandName" label="品牌名称" align="center" width="200" />
-        <el-table-column align="center" label="商品价格" prop="price" width="120" />
-        <el-table-column prop="productCategoryName" label="商品类别" align="center" width="120" />
-        <el-table-column prop="createTime" label="创建时间" align="center" width="220" />
+        <el-table-column
+          prop="name"
+          label="商品名称"
+          align="center"
+          width="220"
+        />
+        <el-table-column
+          prop="brandName"
+          label="品牌名称"
+          align="center"
+          width="200"
+        />
+        <el-table-column
+          align="center"
+          label="商品价格"
+          prop="price"
+          width="120"
+        />
+        <el-table-column
+          prop="productCategoryName"
+          label="商品类别"
+          align="center"
+          width="120"
+        />
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          align="center"
+          width="220"
+        />
         <el-table-column fixed="right" label="操作" align="center" width="50">
           <template slot-scope="scope">
             <el-button
@@ -61,36 +88,66 @@
 </template>
 
 <script>
+import goods from '@/components/goods/index.vue'
+import {
+  findAllBrandList,
+  productsByPage
+} from '@/api/goods/list/index'
 import mix from '@/mixins/index'
 import { Message } from 'element-ui'
 import { findAllRecommends, delRecommend } from '@/api/sales/limited/index'
 export default {
+  components: { goods },
   mixins: [mix],
   data() {
     return {
-      isshow: true,
       dialogVisible: false,
       tableData: [],
+      start: 1,
+      limit: 5,
+      list: [],
       formData: {
-        brandName: ''
-      }
+        'brandId': '',
+        'id': '',
+        'name': '',
+        'productCategoryId': '',
+        'productSn': '',
+        'publishStatus': '',
+        'verifyStatus': ''
+      },
+      total: 0,
+      brandData: []
     }
   },
   created() {
     this.initAddressList()
+    this.init()
   },
   mounted() {},
 
   methods: {
+    // 热销 数据
+    init() {
+      productsByPage(this.start, this.limit, this.formData)
+        .then(res => {
+          // console.log(res)
+          this.total = res.data.total
+          this.list = res.data.rows
+        })
+      // 品牌列表数据
+      findAllBrandList().then((res) => {
+      // console.log(res)
+        this.brandData = res.data.items
+      })
+    },
     // 点击 新增按钮
     openDetail() {
-      this.isshow = true
       this.dialogVisible = true
     },
     // 初始数据
     initAddressList() {
       findAllRecommends().then((res) => {
-        console.log(res.data)
+        // console.log(res.data)
 
         const { data } = res
         this.tableData = data.items
@@ -107,6 +164,28 @@ export default {
           Message.error(message)
         }
       })
+    },
+    // 处理 子组件 的 每页页数
+    parLimit(e) {
+      // console.log(e)
+      this.limit = e
+      this.start = 1
+      this.init()
+    },
+    // 处理 子组件 传递过来的 页数
+    parStart(e) {
+      // console.log(e)
+      this.start = e
+      this.init()
+    },
+    // 子组件的搜索
+    search(e) {
+      this.init()
+    },
+    // 子组件 点击 清空 时 请求数据
+    initClear() {
+      this.start = 1
+      this.init()
     }
   }
 }
