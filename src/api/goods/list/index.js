@@ -114,4 +114,16 @@ export function switchVerifyStatus(data) {
     data
   })
 }
+/**
+ * 新增 商品
+ * @param {*} data
+ * @returns
+ */
+export function addProductAndSkus(data) {
+  return request({
+    url: `/lejuAdmin/product/addProductAndSkus`,
+    method: 'post',
+    data
+  })
+}
 

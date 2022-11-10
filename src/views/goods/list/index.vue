@@ -88,6 +88,7 @@
     <el-card shadow="never" class="table-box">
       <div slot="header" class="clearfix">
         <el-button type="primary" size="mini" @click="add">新增</el-button>
+        <el-button type="primary" size="mini" @click="excel">导出Excel表格</el-button>
       </div>
       <!-- 表格 -->
       <el-table :data="tableData" border stripe style="width: 100%">
@@ -182,6 +183,7 @@
               size="mini"
               type="primary"
               style="margin-bottom: 20px"
+              @click="addSku"
             >新增</el-button>
           </el-col>
         </el-row>
@@ -341,7 +343,11 @@ export default {
     },
     // 点击新增按钮
     add() {
-      // 向 表格后 添加一行
+      this.$router.push('/goods/addGoods')
+    },
+    // 点击 编辑 sku 的新增
+    addSku() {
+      // 像sku 表格添加一行
     },
     initSku() {
       productSkusDetail(this.skuId)
@@ -479,6 +485,34 @@ export default {
             Message.error(res.message)
           }
         })
+    },
+    // 点击 excel 按钮
+    excel() {
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = ['商品名称', '商品价格', '商品类别', '重量', '排序']
+        const filterVal = ['name', 'price', 'productCategoryName', 'weight', 'sort']
+        //  list 表格的元数据
+        // filterVal theader 所对应的字段
+        const list = this.tableData
+        const data = this.formatJson(filterVal, list)
+        excel.export_json_to_excel({
+          header: tHeader, // 表头 必填
+          data: data, // 具体数据 必填
+          filename: 'excel-list', // 非必填
+          autoWidth: true, // 非必填
+          bookType: 'xlsx' // 非必填
+        })
+      })
+    },
+    // 将 一维数组 转为 二维数组
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => {
+        if (j === 'timestamp') {
+          return parseTime(v[j])
+        } else {
+          return v[j]
+        }
+      }))
     }
   }
 }

@@ -95,6 +95,13 @@ export const constantRoutes = [
         meta: { title: '商品列表', icon: 'el-icon-shopping-bag-1' }
       },
       {
+        path: 'addGoods',
+        hidden: true,
+        name: 'addGoods',
+        component: () => import('@/views/goods/list/addGoods'),
+        meta: { title: '新增商品', icon: 'el-icon-shopping-bag-1', activeMenu: '/goods/list' }
+      },
+      {
         path: 'classify',
         name: 'Classify',
         component: () => import('@/views/goods/classify/index'),
