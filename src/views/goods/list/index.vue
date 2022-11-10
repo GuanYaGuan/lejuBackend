@@ -163,7 +163,7 @@
               type="text"
               size="small"
               icon="el-icon-view"
-              @click="edit"
+              @click="edit(scope.row.id)"
             >编辑</el-button>
 
             <el-button
@@ -198,7 +198,16 @@
           />
           <el-table-column label="图片" align="center" width="120">
             <template slot-scope="scope">
-              <img :src="scope.row.pic" width="100" height="100" alt="">
+              <el-upload
+                class="avatar-uploader"
+                action="/lejuAdmin/material/uploadFileOss"
+                :headers="token"
+                :show-file-list="false"
+                :on-success="ele=>handleAvatarSuccess(ele.data.fileUrl,scope.$index)"
+              >
+                <img v-if="scope.row.pic" width="100" height="100 " :src="scope.row.pic" class="avatar">
+                <i v-else class="el-icon-plus avatar-uploader-icon" />
+              </el-upload>
             </template>
           </el-table-column>
           <el-table-column label="颜色" align="center" width="120">
@@ -242,6 +251,7 @@
             </template>
           </el-table-column>
           <el-table-column
+
             fixed="right"
             label="操作"
             align="center"
@@ -256,10 +266,17 @@
               >删除</el-button>
 
               <el-button
+                v-if="!addShow"
                 type="text"
                 size="small"
                 @click="changeEdit(scope.row)"
               >修改编辑</el-button>
+              <el-button
+                v-if="addShow"
+                type="text"
+                size="small"
+                @click="saveSku(scope.$index)"
+              >保存</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -292,7 +309,8 @@ import {
   switchVerifyStatus,
   productSkusDetail,
   delSku,
-  updateSkuInfo
+  updateSkuInfo,
+  addProductSkus
 } from '@/api/goods/list/index'
 import mix from '@/mixins/index'
 import { Message } from 'element-ui'
@@ -305,7 +323,8 @@ export default {
       brandData: [],
       tableData: [],
       skuTableData: [],
-      skuId: ''
+      skuId: '',
+      addShow: false
     }
   },
   created() {
@@ -348,6 +367,38 @@ export default {
     // 点击 编辑 sku 的新增
     addSku() {
       // 像sku 表格添加一行
+      var data = [{ 'key': '', 'value': '' }, { 'key': '', 'value': '' }]
+      var obj = {
+        'lockStock': '', // 锁定库存 预留
+        'lowStock': '', // 低库存预警  预留
+        'pic': '', // sku封面图片
+        'price': '', // 价格
+        'promotionPrice': '', //  促销价格  预留
+        'sale': '', // 销量 预留
+        'skuCode': '', // sku编码
+        'spData': data, //   [{"key":"颜色","value":"土豪金"},{"key":"大小","value":"128g"}]
+        'stock': '', // 库存
+        'modifyTime': '', // 更新时间 后台维护
+        'createTime': '' // 后台自动生成
+      }
+      this.skuTableData.push(obj)
+      this.addShow = true
+    },
+    // 点击 sku 弹窗的 保存
+    saveSku(index) {
+      // console.log(index)
+      this.skuTableData[index].spData = JSON.stringify(this.skuTableData[index].spData)
+      addProductSkus(this.skuTableData[index])
+        .then(res => {
+          const { success, message } = res
+          if (success) {
+            Message.success('添加成功')
+            this.initSku()
+            this.addShow = false
+          } else {
+            Message.error(message)
+          }
+        })
     },
     initSku() {
       productSkusDetail(this.skuId)
@@ -366,6 +417,7 @@ export default {
       this.skuId = id
       this.initSku()
       this.dialogVisible = true
+      this.addShow = false
     },
     // size改变的时候触发的钩子函数
     handleSizeChange(val) {
@@ -391,8 +443,15 @@ export default {
       })
     },
     // 点击 编辑 按钮
-    edit() {
-      // 跳转至 详情页面
+    edit(id) {
+      // console.log(id)
+      // 跳转至 编辑 详情页面
+      this.$router.push({
+        path: '/goods/addGoods',
+        query: {
+          id
+        }
+      })
     },
     // 点击 最新状态 开关按钮
     changeNewStatus(data) {
@@ -513,6 +572,12 @@ export default {
           return v[j]
         }
       }))
+    },
+    // 编辑 sku 图片 上传
+    handleAvatarSuccess(e, index) {
+      // console.log(res)
+      this.skuTableData[index].pic = e
+      // this.imageUrl = URL.createObjectURL(file.raw)
     }
   }
 }

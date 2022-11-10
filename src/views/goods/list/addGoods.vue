@@ -380,7 +380,7 @@
 
 <script>
 import Tinymce from '@/components/Tinymce'
-import { findAllBrandList, addProductAndSkus } from '@/api/goods/list/index'
+import { findAllBrandList, addProductAndSkus, productSkusDetail } from '@/api/goods/list/index'
 import { getAllCategory } from '@/api/goods/classify/index'
 import mix from '@/mixins/index'
 import { Message } from 'element-ui'
@@ -444,6 +444,15 @@ export default {
     }
   },
   created() {
+    if (this.$route.query.id) {
+      productSkusDetail(this.$route.query.id)
+        .then(res => {
+          // console.log(res)
+          const { data } = res
+          this.form.product = data.product
+          this.form.pmsSkuStockList = data.skus
+        })
+    }
     // 分类数据
     this.initKindList()
     // 品牌数据
@@ -475,7 +484,7 @@ export default {
     },
     // 获取 商品分类的 名称
     getCategoryName(e) {
-      console.log(e)
+      // console.log(e)
       this.form.product.productCategoryName = this.leju.find(ele => ele.id === e).name
     },
     // 获取 品牌的名称
@@ -599,7 +608,7 @@ export default {
     },
     // sku 图片上传
     handleAvatarSuccessSku(res, index) {
-      console.log(res, index)
+      // console.log(res, index)
       this.form.pmsSkuStockList[index].pic = res
     },
     // 点击 删除 操作 按钮

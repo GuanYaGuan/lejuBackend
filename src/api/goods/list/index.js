@@ -67,6 +67,19 @@ export function updateSkuInfo(data) {
   })
 }
 /**
+ * 保存 新增的 sku
+ * @param {*} data
+ * @returns
+ */
+export function addProductSkus(data) {
+  return request({
+    url: `/lejuAdmin/sku/addProductSkus`,
+    method: 'post',
+    data
+  })
+}
+
+/**
  * 更改最新状态
  * @param {*} data
  * @returns
