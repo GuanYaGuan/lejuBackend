@@ -3,7 +3,7 @@
     <transition name="fade-transform" mode="out-in">
       <router-view :key="key" />
     </transition>
-    <span class="global-footer-copyright">
+    <span v-if="key!='/home'" class="global-footer-copyright">
       <span class="top">
         Element
         <svg-icon icon-class="github-fill" style="margin:0 10px;" />
