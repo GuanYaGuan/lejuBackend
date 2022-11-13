@@ -44,10 +44,14 @@ module.exports = {
       // 以 '/lejuAdmin' 开头的 相对路径,都代理到 taget 的这个地址
       // originPath 原始路径
       // hostUrl 在 settings.js 文件中
-      '/lejuAdmin': {
+      '/(lejuAdmin|admin)': {
         target: defaultSettings.host,
         changeOrigin: true
       }
+      // '/admin': {
+      //   target: defaultSettings.host,
+      //   changeOrigin: true
+      // }
     },
     // 此处 before 改为 after ,真实项目 以下代码 可以删除; 这里 改为 after 是为了先让它 执行我们的代理 而不是 模拟的数据
     after: require('./mock/mock-server.js')
