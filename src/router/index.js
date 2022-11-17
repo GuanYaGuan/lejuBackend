@@ -139,7 +139,7 @@ export const constantRoutes = [
         path: 'chargebacks',
         name: 'Chargebacks',
         component: () => import('@/views/order/chargebacks/index'),
-        meta: { title: '退单列表', icon: 'el-icon-document-delete' }
+        meta: { title: '退单列表', icon: 'el-icon-document-delete', activeMenu: '/order/chargebacks' }
       },
       {
         path: 'orderReturnDetail',

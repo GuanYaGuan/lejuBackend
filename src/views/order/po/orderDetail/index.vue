@@ -8,7 +8,7 @@
             :description="orderList.orderBase.createTime"
           />
           <el-step
-            title="代发货"
+            title="待发货"
             :description="orderList.orderBase.paymentTime"
           />
           <el-step
@@ -30,14 +30,14 @@
             type="danger"
             size="mini"
             plain
-          >待处理</el-button>
+          >待付款</el-button>
           <el-button
             v-if="orderList.orderBase.status == 1"
             size="mini"
             type="warning"
             plain
           >
-            退货中
+            待发货
           </el-button>
           <el-button
             v-if="orderList.orderBase.status == 2"
@@ -45,7 +45,7 @@
             type="primary"
             plain
           >
-            已完成
+            已发货
           </el-button>
           <el-button
             v-if="orderList.orderBase.status == 3"
@@ -53,7 +53,23 @@
             type="danger"
             plain
           >
-            已拒绝
+            已完成
+          </el-button>
+          <el-button
+            v-if="orderList.orderBase.status == 4"
+            size="mini"
+            type="danger"
+            plain
+          >
+            退货
+          </el-button>
+          <el-button
+            v-if="orderList.orderBase.status == 5"
+            size="mini"
+            type="danger"
+            plain
+          >
+            无效订单
           </el-button>
         </h4>
         <el-row :gutter="20">
@@ -162,6 +178,31 @@
           物流信息:{{ orderList.orderBase.deliveryCompany
           }}{{ orderList.orderBase.deliverySn }}
         </h4>
+        <div v-if="orderList.orderBase.status===1" class="sureTo">
+          <el-form :model="forms" label-width="100px">
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="物流公司">
+                  <el-select v-model="forms.deliveryCompany" placeholder="请选择快递公司">
+                    <el-option v-for="(item,index) in company" :key="index" :label="item" :value="item" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="物流单号">
+                  <el-input v-model="forms.deliverySn" placeholder="请填写物流单号" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="8" :offset="8" style="display:flex;justify-content: center;margin-top:20px;">
+                <el-button type="primary" size="small" @click="sendDoneOrder">
+                  确认发货
+                </el-button>
+              </el-col>
+            </el-row>
+          </el-form>
+        </div>
         <div v-if=" orderList.orderBase.status==2||orderList.orderBase.status==3||orderList.orderBase.status==4" class="table-box">
           <el-table :data="list" border stripe>
             <el-table-column label="时间" prop="date" />
@@ -175,7 +216,7 @@
 </template>
 
 <script>
-import { orderDetail } from '@/api/order/po/index'
+import { orderDetail, sendDone } from '@/api/order/po/index'
 export default {
 
   data() {
@@ -222,13 +263,26 @@ export default {
           status: '呼和浩特市邮政速递物流分公司金川揽投部安排投递',
           note: '投递员姓名：安长虹;联系电话：18047140142'
         }
-      ]
+      ],
+      company: [
+        '顺丰快递',
+        '中国邮政',
+        '韵达快递',
+        '中通快递',
+        '极兔兔快递',
+        '圆通快递',
+        '京东快递'
+      ],
+      forms: {
+        deliveryCompany: '',
+        deliverySn: ''
+      }
     }
   },
   created() {
     orderDetail(this.$route.query.id)
       .then(res => {
-        // console.log(res.data)
+        console.log(res.data)
         this.orderList = res.data.orderDetail
       })
   },
@@ -237,7 +291,20 @@ export default {
   },
 
   methods: {
-
+    // 点击 确认发货
+    sendDoneOrder() {
+      sendDone({
+        orderId: this.orderList.orderBase.id,
+        deliverySn: this.forms.deliverySn,
+        deliveryCompany: this.forms.deliveryCompany
+      })
+        .then(res => {
+          const { success } = res
+          if (success) {
+            this.$router.push('/order/po')
+          }
+        })
+    }
   }
 }
 </script>
@@ -248,6 +315,7 @@ export default {
   .clearfix {
     border-bottom: 1px solid #ebeef5;
     padding-bottom: 30px;
+
   }
 }
 </style>

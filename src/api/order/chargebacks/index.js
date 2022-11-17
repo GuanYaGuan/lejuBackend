@@ -23,3 +23,30 @@ export function orderReturn(id) {
     url: `/lejuAdmin/orderReturn/${id}`
   })
 }
+
+/**
+ * 同意退货
+ * @param {*} id
+ * @param {*} data
+ * @returns
+ */
+export function agreeApply(id, data) {
+  return request({
+    url: `/lejuAdmin/orderReturn/agreeApply/${id}`,
+    method: 'post',
+    data
+  })
+}
+/**
+ * 拒绝退货
+ * @param {*} id
+ * @param {*} data
+ * @returns
+ */
+export function rejectApply(id, data) {
+  return request({
+    url: `/lejuAdmin/orderReturn/rejectApply/${id}`,
+    method: 'post',
+    data
+  })
+}

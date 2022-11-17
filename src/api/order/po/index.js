@@ -23,3 +23,15 @@ export function orderDetail(orderId) {
     url: `/lejuAdmin/order/orderDetail/${orderId}`
   })
 }
+/**
+ * 确认发货
+ * @param {*} data
+ * @returns
+ */
+export function sendDone(data) {
+  return request({
+    url: `/lejuAdmin/order/sendDone`,
+    method: 'post',
+    data
+  })
+}
