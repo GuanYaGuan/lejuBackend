@@ -2,12 +2,18 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken, removeUserInfo, removeToken } from '@/utils/myAuthor'
-
+var baseURL
+if(process.env.NODE_ENV==='development'){
+  // 开发环境
+}else{
+  baseURL='http://leju.bufan.cloud'
+}
 // create an axios instance
 const service = axios.create({
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // baseURL: 'http://leju.bufan.cloud',
   // withCredentials: true, // send cookies when cross-domain requests
+  baseURL,
   timeout: 5000 // request timeout
 })
 

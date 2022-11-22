@@ -93,10 +93,10 @@ export default {
       },
       loginRules: {
         username: [
-          { required: true, trigger: 'blur', validator: validateUsername }
+          { required: true, trigger: 'blur', validate: validateUsername }
         ],
         password: [
-          { required: true, trigger: 'blur', validator: validatePassword }
+          { required: true, trigger: 'blur', validate: validatePassword }
         ]
       },
       loading: false,
